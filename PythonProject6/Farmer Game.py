@@ -18,14 +18,14 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 
-background = pygame.image.load("C:/Users/fkoc8/PycharmProjects/PythonProject6/png/background.png")
+background = pygame.image.load("background.png")
 
-market = pygame.image.load('C:/Users/fkoc8/PycharmProjects/PythonProject6/png/market.png')
-fence = pygame.image.load('C:/Users/fkoc8/PycharmProjects/PythonProject6/png/fence.png')
-cow_img = pygame.image.load('C:/Users/fkoc8/PycharmProjects/PythonProject6/png/cow.png')
-chicken_img = pygame.image.load('C:/Users/fkoc8/PycharmProjects/PythonProject6/png/chicken.png')
-profile_icon = pygame.image.load('C:/Users/fkoc8/PycharmProjects/PythonProject6/png/farmer.png')
-tractor_img = pygame.image.load('C:/Users/fkoc8/PycharmProjects/PythonProject6/png/tractor.png')
+market = pygame.image.load('market.png')
+fence = pygame.image.load('fence.png')
+cow_img = pygame.image.load('cow.png')
+chicken_img = pygame.image.load('chicken.png')
+profile_icon = pygame.image.load('farmer.png')
+tractor_img = pygame.image.load('tractor.png')
 
 background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
@@ -219,7 +219,7 @@ while running:
 
 pygame.quit()
 sys.exit()
-=======
+#=======
 import pygame
 import sys
 import torch
@@ -247,9 +247,9 @@ profile_icon = pygame.image.load('C:/Users/fkoc8/PycharmProjects/PythonProject6/
 tractor_img = pygame.image.load('C:/Users/fkoc8/PycharmProjects/PythonProject6/png/tractor.png')
 
 crop_images = [
-    pygame.image.load("png/crop_stage0.png"),
-    pygame.image.load("png/crop_stage1.png"),
-    pygame.image.load("png/crop_stage2.png")
+    pygame.image.load("crop_stage0.png"),
+    pygame.image.load("crop_stage1.png"),
+    pygame.image.load("crop_stage2.png")
 ]
 
 background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -525,4 +525,4 @@ while running:
 
 pygame.quit()
 sys.exit()
->>>>>>> 5ea1a7d (Son değişiklikler eklendi)
+#>>>>>>> 5ea1a7d (Son değişiklikler eklendi)
