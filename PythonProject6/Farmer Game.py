@@ -105,6 +105,9 @@ def draw_market_content():
         y_offset += 40
 
 
+
+back_sound = pygame.mixer.music.load('farm.wav')
+pygame.mixer.music.play(-1)
 running = True
 while running:
     screen.fill(WHITE)
