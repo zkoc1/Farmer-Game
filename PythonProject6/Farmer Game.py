@@ -31,7 +31,7 @@ background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
 market_rect = market.get_rect(topleft=(1000, 200))
-fence_area_rect = pygame.Rect(1000, 500, 300, 200)
+fence_area_rect = pygame.Rect(1000, 500, 100, 500)
 profile_rect = profile_icon.get_rect(topleft=(20, SCREEN_HEIGHT - 120))
 tractor_rect = tractor_img.get_rect(topleft=(500, 600))
 
