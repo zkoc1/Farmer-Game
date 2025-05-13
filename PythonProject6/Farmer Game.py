@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import random
 pygame.init()
-#traktör yönü + tavuk inek gerçek data ile hava yumurta süt ve buğday envantere
+#traktör yönü + tavuk inek gerçek data ile hava yumurta süt ve buğday envantere abcde
 selected_animal_area = None
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 750
