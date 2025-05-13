@@ -17,7 +17,7 @@ clock = pygame.time.Clock()
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-
+#son
 background = pygame.image.load("background.png")
 market = pygame.image.load('market.png')
 cow_img_right = pygame.image.load('cow_right.png')
