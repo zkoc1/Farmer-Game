@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import random
 pygame.init()
-
+#tropik ve weather 
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 750
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
