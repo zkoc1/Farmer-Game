@@ -1,4 +1,3 @@
-
 import pygame
 import sys
 import torch
@@ -381,5 +380,8 @@ while running:
     pygame.display.flip()
     clock.tick(60)
 
+
+
 pygame.quit()
-sys.exit()
+sys.exit()sys.exit()
+
