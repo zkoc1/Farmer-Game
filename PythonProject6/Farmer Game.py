@@ -159,6 +159,13 @@ class Crop:
         self.timer = 0
         self.rect = pygame.Rect(position[0], position[1], 32, 32)
 
+        # Ekinin farklı büyüme aşamalarına ait resimleri
+        self.images = [
+            pygame.image.load("crop_stage0.png"),
+            pygame.image.load("crop_stage1.png"),
+            pygame.image.load("crop_stage2.png"),
+        ]
+
     def update(self, weather):
         self.timer += 1
         speed = 1
@@ -166,18 +173,21 @@ class Crop:
             speed = 2
         elif weather == 'Kurak':
             speed = 0.3
+
+        # Ekin bir sonraki aşamaya geçsin mi?
         if self.timer > 300 / speed and self.stage < 2:
             self.stage += 1
             self.timer = 0
 
     def draw(self, screen):
-        screen.blit(crop_images[self.stage], self.rect.topleft)
+        screen.blit(self.images[self.stage], self.position)
 
     def is_ready_to_harvest(self):
         return self.stage == 2
 
+
 crops = []
-weather_status = "Bulutlu"
+weather_status = "Yağmurlu"
 planting_allowed = True
 player_money = 1000
 player_level = 5
@@ -232,13 +242,8 @@ running = True
 
 while running:
 
-
-
     screen.fill(WHITE)
     screen.blit(background, (0, 0))
-
-
-
     apply_weather_overlay(screen, weather_status)
     screen.blit(market, market_rect.topleft)
 
@@ -342,14 +347,15 @@ while running:
         tractor_img = tractor_img_left
     move_animals()
 
-
     for crop in crops:
         crop.update(weather_status)
         crop.draw(screen)
+
         if crop.is_ready_to_harvest() and crop.rect.colliderect(tractor_rect):
             player_money += 100
             crop.stage = 0
             crop.timer = 0
+
     screen.blit(tractor_img, tractor_rect.topleft)
     if show_profile:
         pygame.draw.rect(screen, WHITE, (profile_rect.x, profile_rect.y - 100, 200, 100))
