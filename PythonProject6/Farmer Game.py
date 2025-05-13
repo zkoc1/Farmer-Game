@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import random
 pygame.init()
+#düzeldi mi kontrolu
 #traktör yönü + tavuk inek gerçek data ile hava yumurta süt ve buğday envantere
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 750
