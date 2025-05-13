@@ -9,7 +9,7 @@ SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 750
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Farm Game")
-
+#traktör yönü tavuk inek gerçek data ile hava yumurta süt ve buğday envantere
 clock = pygame.time.Clock()
 
 WHITE = (255, 255, 255)
