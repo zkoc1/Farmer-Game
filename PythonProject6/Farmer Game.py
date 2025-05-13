@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import random
 pygame.init()
-#traktör yönü tavuk inek gerçek data ile hava yumurta süt ve buğday envantere
+#traktör yönü + tavuk inek gerçek data ile hava yumurta süt ve buğday envantere
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 750
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -19,10 +19,12 @@ BLACK = (0, 0, 0)
 background = pygame.image.load("background.png")
 market = pygame.image.load('market.png')
 fence = pygame.image.load('fence.png')
-cow_img = pygame.image.load('cow.png')
-chicken_img = pygame.image.load('chicken.png')
+cow_img = pygame.image.load('cow_right.png')
+chicken_img = pygame.image.load('chicken_left.png')
 profile_icon = pygame.image.load('farmer.png')
-tractor_img = pygame.image.load('tractor.png')
+tractor_img_right = pygame.image.load('tractor_right.png')
+tractor_img_left = pygame.image.load('tractor_left.png')
+tractor_img = tractor_img_right
 
 crop_images = [
     pygame.image.load("crop_stage0.png"),
@@ -227,7 +229,7 @@ while running:
     screen.blit(cow_img, cow_pos)
     screen.blit(chicken_img, chicken_pos)
     screen.blit(profile_icon, profile_rect.topleft)
-    screen.blit(tractor_img, tractor_rect.topleft)
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -265,11 +267,18 @@ while running:
                         inventory.append(item["name"])
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]: tractor_rect.x -= 5
-    if keys[pygame.K_RIGHT]: tractor_rect.x += 5
-    if keys[pygame.K_UP]: tractor_rect.y -= 5
-    if keys[pygame.K_DOWN]: tractor_rect.y += 5
-
+    if keys[pygame.K_LEFT]:
+        tractor_rect.x -= 5
+        tractor_img = tractor_img_left
+    elif keys[pygame.K_RIGHT]:
+        tractor_rect.x += 5
+        tractor_img = tractor_img_right
+    elif keys[pygame.K_UP]:
+        tractor_rect.y -= 5
+        tractor_img =  tractor_img_right
+    elif keys[pygame.K_DOWN]:
+        tractor_rect.y += 5
+        tractor_img = tractor_img_left
     move_animals()
 
     for crop in crops:
@@ -279,7 +288,7 @@ while running:
             player_money += 100
             crop.stage = 0
             crop.timer = 0
-
+    screen.blit(tractor_img, tractor_rect.topleft)
     if show_profile:
         pygame.draw.rect(screen, WHITE, (profile_rect.x, profile_rect.y - 100, 200, 100))
         pygame.draw.rect(screen, BLACK, (profile_rect.x, profile_rect.y - 100, 200, 100), 2)
