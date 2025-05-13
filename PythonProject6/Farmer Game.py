@@ -239,7 +239,7 @@ while running:
     cow_img = cow_img_right if cow_speed[0] > 0 else cow_img_left
     chicken_img = chicken_img_right if chicken_speed[0] > 0 else chicken_img_left
 
-    # Hayvanları ekrana çiz
+    #Hayvanları ekrana çiz
     screen.blit(cow_area_img, cow_area_rect.topleft)
     screen.blit(chicken_area_img, chicken_area_rect.topleft)
     screen.blit(cow_img, cow_pos)
