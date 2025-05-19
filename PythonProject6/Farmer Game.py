@@ -188,7 +188,7 @@ class Crop:
 
 
 crops = []
-weather_status = "Yağmurlu"
+weather_status = "Kurak"
 planting_allowed = True
 player_money = 1000
 player_level = 5
