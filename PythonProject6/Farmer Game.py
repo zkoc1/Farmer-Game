@@ -378,8 +378,8 @@ while running:
     #screen.blit(chicken_img, chicken_pos)
     screen.blit(profile_icon, profile_rect.topleft)
     #screen.blit(envanter_img,(700,400))
-    screen.blit(cow_img_right if cow_speed[0] > 0 else cow_img_left, cow_pos)
-    screen.blit(chicken_img_right if chicken_speed[0] > 0 else chicken_img_left, chicken_pos)
+    #screen.blit(cow_img_right if cow_speed[0] > 0 else cow_img_left, cow_pos)
+    #screen.blit(chicken_img_right if chicken_speed[0] > 0 else chicken_img_left, chicken_pos)
     for chicken in chickens:
         chicken.update(chicken_area_rect)
         chicken.draw(screen)
