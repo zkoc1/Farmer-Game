@@ -65,6 +65,7 @@ chicken_area_rect = chicken_area_img.get_rect(topleft=(10, 50))
 cow_pos = [cow_area_rect.x +10, cow_area_rect.y+20 ]
 chicken_pos = [chicken_area_rect.x+10 , chicken_area_rect.y+10 ]
 
+
 cow_speed = [random.choice([-0.5, 0.5]), random.choice([-0.5, 0.5])]
 chicken_speed = [random.choice([-0.5, 0.5]), random.choice([-0.5, 0.5])]
 dragging_cow_area =False
@@ -317,7 +318,7 @@ class Cow:
             self.milk_rect.midbottom = (self.rect.centerx, self.rect.top)
 
     def draw(self, screen):
-        # Hızın x yönüne göre resim seç
+
         if self.speed[0] >= 0:
             image = self.image_right
         else:
@@ -407,12 +408,15 @@ while running:
                 dragging_chicken_area = True
                 offset_x = chicken_area_rect.x - event.pos[0]
                 offset_y = chicken_area_rect.y - event.pos[1]
+
             if planting_allowed:
                 mouse_x, mouse_y = event.pos
                 if not (
                         cow_area_rect.collidepoint((mouse_x, mouse_y)) or
                         chicken_area_rect.collidepoint((mouse_x, mouse_y)) or
-                        market_rect.collidepoint((mouse_x, mouse_y))
+                        market_rect.collidepoint((mouse_x, mouse_y))or
+                        profile_rect.collidepoint((mouse_x, mouse_y)) or
+                        tractor_rect.collidepoint((mouse_x, mouse_y))
                 ):
                     crops.append(Crop((mouse_x, mouse_y)))
             elif profile_rect.collidepoint(event.pos):
@@ -491,21 +495,36 @@ while running:
                         player_money -= item["price"]
                         inventory.append(item["name"])
 
+    new_tractor_rect = tractor_rect
+
+    # Çakışma varsa hareket etme
+    if (not new_tractor_rect.colliderect(market_rect) and
+            not new_tractor_rect.colliderect(cow_area_rect) and
+            not  new_tractor_rect.colliderect(profile_rect) and
+            not new_tractor_rect.colliderect(chicken_area_rect)):
+        tractor_rect = new_tractor_rect
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
-        tractor_rect.x -= 5
+        new_rect = tractor_rect.move(-5, 0)
+        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect]):
+            tractor_rect = new_rect
         tractor_img = tractor_img_left
-    elif keys[pygame.K_RIGHT]:
-        tractor_rect.x += 5
+    if keys[pygame.K_RIGHT]:
+        new_rect = tractor_rect.move(5, 0)
+        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect]):
+            tractor_rect = new_rect
         tractor_img = tractor_img_right
-    elif keys[pygame.K_UP]:
-        tractor_rect.y -= 5
+    if keys[pygame.K_UP]:
+        new_rect = tractor_rect.move( 0,-5)
+        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect]):
+            tractor_rect = new_rect
         tractor_img =  tractor_img_right
-    elif keys[pygame.K_DOWN]:
-        tractor_rect.y += 5
+    if keys[pygame.K_DOWN]:
+        new_rect = tractor_rect.move(0,5)
+        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect]):
+            tractor_rect = new_rect
         tractor_img = tractor_img_left
-
 
 
     for crop in crops:
