@@ -37,6 +37,9 @@ crop_images = [
     pygame.image.load("crop_stage2.png")
 ]
 
+inventory = {}
+
+
 background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 def apply_weather_overlay(surface, weather):
@@ -77,7 +80,7 @@ show_inventory = False
 
 player_money = 1000
 player_level = 5
-inventory = []
+
 
 market_items = [
     {"name": "Buğday Tohumu", "price": 100},
@@ -189,7 +192,7 @@ class Crop:
 
 
 crops = []
-weather_status = "Kurak"
+weather_status = "Yağmurlu"
 planting_allowed = True
 player_money = 1000
 player_level = 5
@@ -198,8 +201,8 @@ def draw_inventory():
     pygame.draw.rect(screen, WHITE, (100, 100, 400, 400))
     pygame.draw.rect(screen, BLACK, (100, 100, 400, 400), 2)
     y_offset = 120
-    for item in inventory:
-        text = font.render(item, True, BLACK)
+    for item, count in inventory.items():
+        text = font.render(f"{item}: {count}", True, BLACK)
         screen.blit(text, (120, y_offset))
         y_offset += 40
 
@@ -208,51 +211,142 @@ def move_animals():
     cow_pos[0] += cow_speed[0]
     cow_pos[1] += cow_speed[1]
 
-    # Sadece cow_area içinde hareket etsin
-    if cow_pos[0] < cow_area_rect.x + 10 or cow_pos[0] > cow_area_rect.right - 60:
+    # Yeni: cow_area_rect'e göre sınırlandır
+    if cow_pos[0] < cow_area_rect.left + 10:
+        cow_pos[0] = cow_area_rect.left + 10
         cow_speed[0] *= -1
-    if cow_pos[1] < cow_area_rect.y + 10 or cow_pos[1] > cow_area_rect.bottom - 60:
+    elif cow_pos[0] > cow_area_rect.right - 60:
+        cow_pos[0] = cow_area_rect.right - 60
+        cow_speed[0] *= -1
+
+    if cow_pos[1] < cow_area_rect.top + 10:
+        cow_pos[1] = cow_area_rect.top + 10
+        cow_speed[1] *= -1
+    elif cow_pos[1] > cow_area_rect.bottom - 60:
+        cow_pos[1] = cow_area_rect.bottom - 60
         cow_speed[1] *= -1
 
 
-    chicken_pos[0] += chicken_speed[0]
-    chicken_pos[1] += chicken_speed[1]
+    #chicken_pos[0] += chicken_speed[0]
+    #chicken_pos[1] += chicken_speed[1]
 
 
-    if chicken_pos[0] < chicken_area_rect.x +10 or chicken_pos[0] > chicken_area_rect.right - 10:
-        chicken_speed[0] *= -1
-    if chicken_pos[1] < chicken_area_rect.y + 10 or chicken_pos[1] > chicken_area_rect.bottom - 10:
-        chicken_speed[1] *= -1
+    #if chicken_pos[0] < chicken_area_rect.x +10 or chicken_pos[0] > chicken_area_rect.right - 10:
+    #    chicken_speed[0] *= -1
+    #if chicken_pos[1] < chicken_area_rect.y + 10 or chicken_pos[1] > chicken_area_rect.bottom - 10:
+     #   chicken_speed[1] *= -1
 
 class Chicken:
-    def __init__(self, position):
+    def __init__(self, offset_position):
         self.image = pygame.image.load("chicken_right.jpg")
         self.egg_icon = pygame.image.load("egg.png")
-        self.position = position
-        self.rect = self.image.get_rect(topleft=position)
-        self.last_egg_time = pygame.time.get_ticks()
-        self.has_egg = False
 
-    def update(self):
+        self.offset = list(offset_position)  # Alan içinde nerede olduğunu temsil eder
+        self.speed = [1, 1]
+
+        self.rect = self.image.get_rect()
+        self.egg_visible = False
+        self.egg_rect = None
+        self.last_egg_time = pygame.time.get_ticks()
+
+    def update(self, area_rect):
+        # Hareketli alan içinde offset'e göre pozisyon belirle
+        self.offset[0] += self.speed[0]
+        self.offset[1] += self.speed[1]
+
+        # Alan sınırlarına göre çarpma kontrolü
+        if self.offset[0] < 10 or self.offset[0] > area_rect.width - self.rect.width - 10:
+            self.speed[0] *= -1
+        if self.offset[1] < 10 or self.offset[1] > area_rect.height - self.rect.height - 10:
+            self.speed[1] *= -1
+
+        # Güncel pozisyonu hesapla
+        self.rect.topleft = (area_rect.left + self.offset[0], area_rect.top + self.offset[1])
+
+        # Yumurtlama zamanı
         current_time = pygame.time.get_ticks()
-        if current_time - self.last_egg_time >= 20000:  # 20 saniye
-            self.has_egg = True
+        if not self.egg_visible and current_time - self.last_egg_time >= 2000:
+            self.egg_visible = True
+            self.egg_rect = self.egg_icon.get_rect(midbottom=(self.rect.centerx, self.rect.top))
+
+        # Yumurtanın pozisyonu güncellenmeli
+        if self.egg_visible and self.egg_rect:
+            self.egg_rect.midbottom = (self.rect.centerx, self.rect.top)
+    def draw(self, screen):
+        screen.blit(self.image, self.rect.topleft)
+        if self.egg_visible:
+            # Yumurtayı tavuğun güncel pozisyonuna göre çiz
+            self.egg_rect.midbottom = (self.rect.centerx, self.rect.top)
+            screen.blit(self.egg_icon, self.egg_rect.topleft)
+
+    def check_egg_click(self, mouse_pos):
+        if self.egg_visible and self.egg_rect:
+            expanded_rect = self.egg_rect.inflate(40, 40)
+            if expanded_rect.collidepoint(mouse_pos):
+                self.egg_visible = False
+                self.last_egg_time = pygame.time.get_ticks()
+                return True
+        return False
+chickens = [
+    Chicken((10, 10)),
+    Chicken((50, 100))
+]
+
+class Cow:
+    def __init__(self, offset_position):
+        self.image_right = pygame.image.load("cow_right.png")
+        self.image_left = pygame.image.load("cow_left.png")
+        self.milk_icon = pygame.image.load("milk-bottle.png")
+        self.offset = list(offset_position)
+        self.speed = [1, 1]
+        self.rect = self.image_right.get_rect()
+        self.milk_visible = False
+        self.milk_rect = None
+        self.last_milk_time = pygame.time.get_ticks()
+
+    def update(self, area_rect):
+        self.offset[0] += self.speed[0]
+        self.offset[1] += self.speed[1]
+
+        if self.offset[0] < 10 or self.offset[0] > area_rect.width - self.rect.width - 10:
+            self.speed[0] *= -1
+        if self.offset[1] < 10 or self.offset[1] > area_rect.height - self.rect.height - 10:
+            self.speed[1] *= -1
+
+        self.rect.topleft = (area_rect.left + self.offset[0], area_rect.top + self.offset[1])
+
+        current_time = pygame.time.get_ticks()
+        if not self.milk_visible and current_time - self.last_milk_time >= 2000:
+            self.milk_visible = True
+            self.milk_rect = self.milk_icon.get_rect(midbottom=(self.rect.centerx, self.rect.top))
+
+        if self.milk_visible and self.milk_rect:
+            self.milk_rect.midbottom = (self.rect.centerx, self.rect.top)
 
     def draw(self, screen):
-        screen.blit(self.image, self.position)
-        if self.has_egg:
-            icon_pos = (self.position[0] + 10, self.position[1] - 20)
-            screen.blit(self.egg_icon, icon_pos)
+        # Hızın x yönüne göre resim seç
+        if self.speed[0] >= 0:
+            image = self.image_right
+        else:
+            image = self.image_left
 
-    def check_click(self, mouse_pos):
-        icon_rect = pygame.Rect(self.position[0] + 10, self.position[1] - 20, 24, 24)
-        if self.has_egg and icon_rect.collidepoint(mouse_pos):
-            self.has_egg = False
-            self.last_egg_time = pygame.time.get_ticks()
-            return True  # Yumurta toplandı
+        screen.blit(image, self.rect.topleft)
+        if self.milk_visible:
+            screen.blit(self.milk_icon, self.milk_rect.topleft)
+
+    def check_milk_click(self, mouse_pos):
+        if self.milk_visible and self.milk_rect:
+            expanded_rect = self.milk_rect.inflate(40, 40)
+            if expanded_rect.collidepoint(mouse_pos):
+                self.milk_visible = False
+                self.last_milk_time = pygame.time.get_ticks()
+                return True
         return False
 
-
+cows = [
+    Cow((30, 50)),
+    Cow((100, 150))
+]
 
 
 def draw_market_content():
@@ -280,21 +374,27 @@ while running:
 
 
 
-    cow_img = cow_img_right if cow_speed[0] > 0 else cow_img_left
-    chicken_img = chicken_img_right if chicken_speed[0] > 0 else chicken_img_left
+    #cow_img = cow_img_right if cow_speed[0] > 0 else cow_img_left
+    #chicken_img = chicken_img_right if chicken_speed[0] > 0 else chicken_img_left
 
-    #Hayvanları ekrana çiz
+
 
     screen.blit(cow_area_img, cow_area_rect.topleft)
     screen.blit(chicken_area_img, chicken_area_rect.topleft)
-    screen.blit(cow_img, cow_pos)
-    screen.blit(chicken_img, chicken_pos)
+    #screen.blit(cow_img, cow_pos)
+    #screen.blit(chicken_img, chicken_pos)
     screen.blit(profile_icon, profile_rect.topleft)
     #screen.blit(envanter_img,(700,400))
     screen.blit(cow_area_img, cow_area_rect.topleft)
     screen.blit(chicken_area_img, chicken_area_rect.topleft)
     screen.blit(cow_img_right if cow_speed[0] > 0 else cow_img_left, cow_pos)
     screen.blit(chicken_img_right if chicken_speed[0] > 0 else chicken_img_left, chicken_pos)
+    for chicken in chickens:
+        chicken.update(chicken_area_rect)
+        chicken.draw(screen)
+    for cow in cows:
+        cow.update(cow_area_rect)
+        cow.draw(screen)
 
 
     for event in pygame.event.get():
@@ -326,6 +426,20 @@ while running:
             elif planting_allowed and player_money >= 50:
                 crops.append(Crop(event.pos))
                 player_money -= 50
+                for cow in cows:
+                    if cow.check_milk_click(event.pos):
+                        inventory["Süt"] = inventory.get("Süt", 0) + 1
+                        player_money += 20  # süt sattığında para kazanma
+                        print("Süt toplandı! Envanter:", inventory)
+                for chicken in chickens:
+                    if chicken.check_egg_click(event.pos):
+                        inventory["Yumurta"] = inventory.get("Yumurta", 0) + 1
+                        player_money += 10  # yumurta sattığında para kazanma
+                        print("Yumurta toplandı! Envanter:", inventory)
+
+
+
+
 
         elif event.type == pygame.MOUSEBUTTONUP:
             dragging_cow_area = False
@@ -356,6 +470,26 @@ while running:
             elif dragging_market:
                 market_rect.x = event.pos[0] + offset_x
                 market_rect.y = event.pos[1] + offset_y
+            elif dragging_chicken_area:
+                dx = (event.pos[0] + offset_x) - chicken_area_rect.x
+                dy = (event.pos[1] + offset_y) - chicken_area_rect.y
+
+                chicken_area_rect.x += dx
+                chicken_area_rect.y += dy
+                for chicken in chickens:
+                    chicken.offset[0] += dx
+                    chicken.offset[1] += dy
+            elif dragging_cow_area:
+                dx = (event.pos[0] + offset_x) - cow_area_rect.x
+                dy = (event.pos[1] + offset_y) - cow_area_rect.y
+
+                cow_area_rect.x += dx
+                cow_area_rect.y += dy
+
+                for cow in cows:
+                    cow.offset[0] += dx
+                    cow.offset[1] += dy
+
 
 
         elif event.type == pygame.KEYDOWN:
@@ -379,7 +513,7 @@ while running:
     elif keys[pygame.K_DOWN]:
         tractor_rect.y += 5
         tractor_img = tractor_img_left
-    move_animals()
+
 
 
     for crop in crops:
@@ -390,7 +524,7 @@ while running:
             player_money += 100
             crop.stage = 0
             crop.timer = 0
-
+    move_animals()
     screen.blit(tractor_img, tractor_rect.topleft)
     if show_profile:
         pygame.draw.rect(screen, WHITE, (profile_rect.x, profile_rect.y - 100, 200, 100))
