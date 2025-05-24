@@ -4,7 +4,9 @@ import torch
 import torch.nn as nn
 import random
 pygame.init()
-#traktör yönü + tavuk inek gerçek data ile hava yumurta süt ve buğday envantere
+#traktör cow ve chcken alanına giremez hareket etmeyen tavuk süt ve yumurta toplama süreleri
+#yeni framde konum seçimi ve bun aözel malzeme ekimi ile  data baseden hava durumu
+
 selected_animal_area = None
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 750
@@ -227,16 +229,6 @@ def move_animals():
         cow_pos[1] = cow_area_rect.bottom - 60
         cow_speed[1] *= -1
 
-
-    #chicken_pos[0] += chicken_speed[0]
-    #chicken_pos[1] += chicken_speed[1]
-
-
-    #if chicken_pos[0] < chicken_area_rect.x +10 or chicken_pos[0] > chicken_area_rect.right - 10:
-    #    chicken_speed[0] *= -1
-    #if chicken_pos[1] < chicken_area_rect.y + 10 or chicken_pos[1] > chicken_area_rect.bottom - 10:
-     #   chicken_speed[1] *= -1
-
 class Chicken:
     def __init__(self, offset_position):
         self.image = pygame.image.load("chicken_right.jpg")
@@ -375,8 +367,8 @@ while running:
 
 
 
-    #cow_img = cow_img_right if cow_speed[0] > 0 else cow_img_left
-    #chicken_img = chicken_img_right if chicken_speed[0] > 0 else chicken_img_left
+    cow_img = cow_img_right if cow_speed[0] > 0 else cow_img_left
+    chicken_img = chicken_img_right if chicken_speed[0] > 0 else chicken_img_left
 
 
 
@@ -451,7 +443,7 @@ while running:
 
         elif event.type == pygame.MOUSEMOTION:
 
-           
+
 
             if dragging_cow_area:
                 dx = (event.pos[0] + offset_x) - cow_area_rect.x
