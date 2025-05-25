@@ -4,8 +4,7 @@ import torch
 import torch.nn as nn
 import random
 pygame.init()
-#traktör cow ve chcken alanına giremez hareket etmeyen tavuk süt ve yumurta toplama süreleri
-#yeni framde konum seçimi ve bun aözel malzeme ekimi ile  data baseden hava durumu
+#yeni framde konum seçimi ve buna özel malzeme ekimi ile  data baseden hava durumu
 
 selected_animal_area = None
 SCREEN_WIDTH = 1400
