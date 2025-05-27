@@ -6,7 +6,23 @@ import random
 pygame.init()
 #traktör cow ve chcken alanına giremez hareket etmeyen tavuk süt ve yumurta toplama süreleri
 #yeni framde konum seçimi ve bun aözel malzeme ekimi ile  data baseden hava durumu
-
+city_weather_data = {
+    "Antalya": (32, 60, 10),
+    "Mersin": (30, 70, 8),
+    "Adana": (35, 55, 12),
+    "Muğla": (28, 65, 7),
+    "İzmir": (27, 62, 9)
+}
+city_fruit_data = {
+    "Antalya": "Mango",
+    "Mersin": "Ananas",
+    "Adana": "Papaya",
+    "Muğla": "Avokado",
+    "İzmir": "Kivi"
+}
+screen = pygame.display.set_mode((800, 600))
+font = pygame.font.SysFont(None, 40)
+cities = ["Antalya", "Mersin", "Adana", "Muğla", "İzmir"]
 selected_animal_area = None
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 750
@@ -33,6 +49,13 @@ cow_area_img = pygame.image.load('cow_area.png')
 chicken_area_img = pygame.image.load('chicken_area.png')
 envanter_img=pygame.image.load("envanter.png")
 
+fruit_images = {
+    "Mango": pygame.image.load("mango.png"),
+    "Ananas": pygame.image.load("ananas.png"),
+    "Papaya": pygame.image.load("papaya.png"),
+    "Avokado": pygame.image.load("avokado.png"),
+    "Kivi": pygame.image.load("kivi.png")
+}
 crop_images = [
     pygame.image.load("crop_stage0.png"),
     pygame.image.load("crop_stage1.png"),
@@ -142,7 +165,36 @@ def predict_weather(temp, humidity, wind):
         pred = torch.argmax(output, dim=1).item()
     durumlar = ['Güneşli', 'Yağmurlu', 'Kurak', 'Bulutlu']
     return durumlar[pred]
-    return durumlar[pred]
+
+def select_city_screen():
+        selected_city = None
+        while True:
+            screen.fill((200, 220, 255))
+            title = font.render("Bir şehir seçin (1-5):", True, (0, 0, 0))
+            screen.blit(title, (250, 50))
+
+            for i, city in enumerate(cities):
+                text = font.render(f"{i + 1}. {city}", True, (0, 0, 0))
+                screen.blit(text, (300, 150 + i * 50))
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    # Klavyeden 1-5 arası tuşa basıldıysa
+                    if pygame.K_1 <= event.key <= pygame.K_1 + len(cities) - 1:
+                        index = event.key - pygame.K_1
+                        selected_city = cities[index]
+                        return selected_city
+
+selected_city = select_city_screen()
+print("Seçilen şehir:", selected_city)
+temp, humidity, wind = city_weather_data[selected_city]
+weather_status = predict_weather(temp, humidity, wind)
+tropik_fruit = city_fruit_data[selected_city]
 
 class RainEffect:
     def __init__(self):
@@ -348,6 +400,7 @@ while running:
 
     screen.fill(WHITE)
     screen.blit(background, (0, 0))
+    screen.blit(fruit_images[tropik_fruit], (1200, 100))
     apply_weather_overlay(screen, weather_status)
     screen.blit(market, market_rect.topleft)
 
@@ -445,24 +498,8 @@ while running:
 
 
 
-            if dragging_cow_area:
-                dx = (event.pos[0] + offset_x) - cow_area_rect.x
-                dy = (event.pos[1] + offset_y) - cow_area_rect.y
 
-                cow_area_rect.x += dx
-                cow_area_rect.y += dy
-                cow_pos[0] += dx
-                cow_pos[1] += dy
-
-            elif dragging_chicken_area:
-                dx = (event.pos[0] + offset_x) - chicken_area_rect.x
-                dy = (event.pos[1] + offset_y) - chicken_area_rect.y
-
-                chicken_area_rect.x += dx
-                chicken_area_rect.y += dy
-                chicken_pos[0] += dx
-                chicken_pos[1] += dy
-            elif dragging_market:
+            if dragging_market:
                 market_rect.x = event.pos[0] + offset_x
                 market_rect.y = event.pos[1] + offset_y
             elif dragging_chicken_area:
@@ -528,6 +565,7 @@ while running:
         crop.draw(screen)
 
         if crop.is_ready_to_harvest() and crop.rect.colliderect(tractor_rect):
+            inventory["Buğday"] = inventory.get("Buğday", 0) + 1
             player_money += 100
             crop.stage = 0
             crop.timer = 0
