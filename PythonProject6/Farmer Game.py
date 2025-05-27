@@ -6,6 +6,7 @@ import random
 pygame.init()
 #traktör cow ve chcken alanına giremez hareket etmeyen tavuk süt ve yumurta toplama süreleri
 #yeni framde konum seçimi ve bun aözel malzeme ekimi ile  data baseden hava durumu
+#son kısım
 city_weather_data = {
     "Antalya": (32, 60, 10),
     "Mersin": (30, 70, 8),
