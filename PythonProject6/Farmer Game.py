@@ -21,7 +21,7 @@ city_fruit_data = {
     "Muğla": "Avokado",
     "İzmir": "Kivi"
 }
-screen = pygame.display.set_mode((800, 600))
+#screen = pygame.display.set_mode((900, 700))
 font = pygame.font.SysFont(None, 40)
 cities = ["Antalya", "Mersin", "Adana", "Muğla", "İzmir"]
 selected_animal_area = None
@@ -250,7 +250,7 @@ class Crop:
 
 
 crops = []
-weather_status = "Yağmurlu"
+#weather_status = "Yağmurlu"
 planting_allowed = True
 player_money = 1000
 player_level = 5
@@ -496,11 +496,27 @@ while running:
 
 
         elif event.type == pygame.MOUSEMOTION:
+            if dragging_cow_area:
+                dx = (event.pos[0] + offset_x) - cow_area_rect.x
+                dy = (event.pos[1] + offset_y) - cow_area_rect.y
+
+                cow_area_rect.x += dx
+                cow_area_rect.y += dy
+                cow_pos[0] += dx
+                cow_pos[1] += dy
+
+            elif dragging_chicken_area:
+                dx = (event.pos[0] + offset_x) - chicken_area_rect.x
+                dy = (event.pos[1] + offset_y) - chicken_area_rect.y
+
+                chicken_area_rect.x += dx
+                chicken_area_rect.y += dy
+                chicken_pos[0] += dx
+                chicken_pos[1] += dy
 
 
 
-
-            if dragging_market:
+            elif dragging_market:
                 market_rect.x = event.pos[0] + offset_x
                 market_rect.y = event.pos[1] + offset_y
             elif dragging_chicken_area:
