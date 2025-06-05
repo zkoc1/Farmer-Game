@@ -4,9 +4,9 @@ import torch
 import torch.nn as nn
 import random
 pygame.init()
-#traktör cow ve chcken alanına giremez hareket etmeyen tavuk süt ve yumurta toplama süreleri
-#yeni framde konum seçimi ve bun aözel malzeme ekimi ile  data baseden hava durumu
-#son kısım
+# süt ve yumurta toplama süreleri
+# data baseden hava durumu
+#para artmalı süt ve yumurtayla market centexi değişsin ve paraya göre seviye ayarlansın başlangıçta isim sorulsun oyuncuya
 
 city_weather_data = {
     "Antalya": (32, 60, 10),
@@ -415,8 +415,6 @@ while running:
 
     screen.blit(cow_area_img, cow_area_rect.topleft)
     screen.blit(chicken_area_img, chicken_area_rect.topleft)
-    #screen.blit(cow_img, cow_pos)
-    #screen.blit(chicken_img, chicken_pos)
     screen.blit(profile_icon, profile_rect.topleft)
     #screen.blit(envanter_img,(700,400))
     #screen.blit(cow_img_right if cow_speed[0] > 0 else cow_img_left, cow_pos)
@@ -501,46 +499,55 @@ while running:
                 dx = (event.pos[0] + offset_x) - cow_area_rect.x
                 dy = (event.pos[1] + offset_y) - cow_area_rect.y
 
-                cow_area_rect.x += dx
-                cow_area_rect.y += dy
-                cow_pos[0] += dx
-                cow_pos[1] += dy
+                #cow_area_rect.x += dx
+                #cow_area_rect.y += dy
+                #cow_pos[0] += dx
+                #cow_pos[1] += dy
+                new_rect = cow_area_rect.move(dx, dy)
+
+                if not any(new_rect.colliderect(r) for r in
+                           [market_rect, chicken_area_rect, tractor_rect, profile_rect]) and \
+                        not any(new_rect.colliderect(crop.rect) for crop in crops):
+                    cow_area_rect = new_rect
+                    cow_pos[0] += dx
+                    cow_pos[1] += dy
+                    for cow in cows:
+                        cow.offset[0] += dx
+                        cow.offset[1] += dy
+
 
             elif dragging_chicken_area:
                 dx = (event.pos[0] + offset_x) - chicken_area_rect.x
                 dy = (event.pos[1] + offset_y) - chicken_area_rect.y
 
-                chicken_area_rect.x += dx
-                chicken_area_rect.y += dy
-                chicken_pos[0] += dx
-                chicken_pos[1] += dy
+                #chicken_area_rect.x += dx
+                #chicken_area_rect.y += dy
+                #chicken_pos[0] += dx
+                #chicken_pos[1] += dy
+                new_rect = chicken_area_rect.move(dx, dy)
 
-
+                if not any(
+                        new_rect.colliderect(r) for r in [market_rect, cow_area_rect, tractor_rect, profile_rect]) and \
+                        not any(new_rect.colliderect(crop.rect) for crop in crops):
+                    chicken_area_rect = new_rect
+                    chicken_pos[0] += dx
+                    chicken_pos[1] += dy
+                    for chicken in chickens:
+                        chicken.offset[0] += dx
+                        chicken.offset[1] += dy
 
             elif dragging_market:
-                market_rect.x = event.pos[0] + offset_x
-                market_rect.y = event.pos[1] + offset_y
+                dx = (event.pos[0] + offset_x) - market_rect.x
+                dy = (event.pos[1] + offset_y) - market_rect.y
 
-            elif dragging_chicken_area:
-                dx = (event.pos[0] + offset_x) - chicken_area_rect.x
-                dy = (event.pos[1] + offset_y) - chicken_area_rect.y
+                new_rect = market_rect.move(dx, dy)
 
-                chicken_area_rect.x += dx
-                chicken_area_rect.y += dy
-                for chicken in chickens:
-                    chicken.offset[0] += dx
-                    chicken.offset[1] += dy
+                if not any(new_rect.colliderect(r) for r in
+                           [cow_area_rect, chicken_area_rect, tractor_rect, profile_rect]) and \
+                        not any(new_rect.colliderect(crop.rect) for crop in crops):
+                    market_rect = new_rect
 
-            elif dragging_cow_area:
-                dx = (event.pos[0] + offset_x) - cow_area_rect.x
-                dy = (event.pos[1] + offset_y) - cow_area_rect.y
 
-                cow_area_rect.x += dx
-                cow_area_rect.y += dy
-
-                for cow in cows:
-                    cow.offset[0] += dx
-                    cow.offset[1] += dy
         elif event.type == pygame.KEYDOWN:
             if show_market_content:
                 for idx, item in enumerate(market_items):
@@ -557,38 +564,6 @@ while running:
             not new_tractor_rect.colliderect(chicken_area_rect)):
         tractor_rect = new_tractor_rect
 
-    # Çakışma varsa market hareket etmesin
-    new_market_rect = market_rect.copy()
-    if dragging_market:
-        new_market_rect.topleft = market_rect.topleft
-        if (not new_market_rect.colliderect(cow_area_rect)
-                and not new_market_rect.colliderect(chicken_area_rect)
-                and not new_market_rect.colliderect(tractor_rect)
-                and not new_market_rect.colliderect(profile_rect)):
-                #and not any(new_market_rect.colliderect(crop) for crop in planted_crops)
-            market_rect = new_market_rect  # hareket geçerli
-
-    # Çakışma varsa inek alanı hareket etmesin
-    new_cow_rect = cow_area_rect.copy()
-    if dragging_cow_area:
-        new_cow_rect.topleft = cow_area_rect.topleft
-        if (not new_cow_rect.colliderect(market_rect)
-                and not new_cow_rect.colliderect(chicken_area_rect)
-                and not new_cow_rect.colliderect(tractor_rect)
-                and not new_cow_rect.colliderect(profile_rect)):
-                #and not any(new_cow_rect.colliderect(crop) for crop in planted_crops)
-            cow_area_rect = new_cow_rect
-
-    # Çakışma varsa tavuk alanı hareket etmesin
-    new_chicken_rect = chicken_area_rect.copy()
-    if dragging_chicken_area:
-        new_chicken_rect.topleft = chicken_area_rect.topleft
-        if (not new_chicken_rect.colliderect(market_rect)
-                and not new_chicken_rect.colliderect(cow_area_rect)
-                and not new_chicken_rect.colliderect(tractor_rect)
-                and not new_chicken_rect.colliderect(profile_rect)):
-                #and not any(new_chicken_rect.colliderect(crop) for crop in planted_crops)
-            chicken_area_rect = new_chicken_rect
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
@@ -624,7 +599,7 @@ while running:
             crop.timer = 0
 
     screen.blit(tractor_img, tractor_rect.topleft)
-    if show_profile:
+    if  keys[pygame.K_p]:
         pygame.draw.rect(screen, WHITE, (profile_rect.x, profile_rect.y - 100, 200, 100))
         pygame.draw.rect(screen, BLACK, (profile_rect.x, profile_rect.y - 100, 200, 100), 2)
         screen.blit(font.render(f"Para: {player_money}₺", True, BLACK), (profile_rect.x + 10, profile_rect.y - 90))
@@ -637,6 +612,10 @@ while running:
 
 
         pygame.display.update()
+    if keys[pygame.K_m]:
+        show_market_content = True
+    else:
+        show_market_content = False
     if show_market_content:
         draw_market_content()
 
