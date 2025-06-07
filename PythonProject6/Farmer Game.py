@@ -112,7 +112,7 @@ show_cow_content = False
 show_chicken_content = False
 show_inventory = False
 
-player_money = 1000
+player_money=0
 player_level = 5
 
 
@@ -258,8 +258,35 @@ class Crop:
 crops = []
 #weather_status = "Yağmurlu"
 planting_allowed = True
-player_money = 1000
 player_level = 5
+
+def draw_sell_button():
+    pygame.draw.rect(screen, (0, 200, 0), (550, 400, 100, 40))  # yeşil buton
+    text = font.render("Sat", True, WHITE)
+    screen.blit(text, (570, 410))
+
+
+def sell_items():
+    global player_money
+    eggs = inventory.get("Yumurta",0)
+    milk = inventory.get("Süt", 0)
+
+    egg_price = 5
+    milk_price = 10
+
+    earned = eggs * egg_price + milk * milk_price
+    player_money += earned
+    print(f"Satış yapıldı! Kazanç: {earned}, Toplam Para: {player_money}")
+    inventory["Yumurta"] = 0
+    inventory["Süt"] = 0
+
+
+def draw_money_and_level():
+    player_level = player_money // 100  # her 100 para 1 seviye
+    money_text = font.render(f"Para: {player_money}", True, BLACK)
+    level_text = font.render(f"Seviye: {player_level}", True, BLACK)
+    screen.blit(money_text, (120, 60))
+    screen.blit(level_text, (120, 80))
 
 
 def draw_inventory():
@@ -271,6 +298,8 @@ def draw_inventory():
         text = font.render(f"{item}: {count}", True, BLACK)
         screen.blit(text, (120, y_offset))
         y_offset += 40
+    draw_money_and_level()
+    draw_sell_button()
 
 
 
@@ -436,13 +465,16 @@ while running:
         cow.draw(screen)
 
 
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
-
+            mouse_x, mouse_y = event.pos
+            if 550 <= mouse_x <= 650 and 400 <= mouse_y <= 440:
+                sell_items()
             # Yumurtalara tıklama kontrolü
             for chicken in chickens:
                 if chicken.check_egg_click(mouse_pos):
