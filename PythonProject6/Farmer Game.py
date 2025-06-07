@@ -3,11 +3,11 @@ import sys
 import torch
 import torch.nn as nn
 import random
-pygame.init()
 # süt ve yumurta toplama süreleri
 # data baseden hava durumu
 # market centexi değişsin
 #tropik meyve kısmı
+pygame.init()
 city_weather_data = {
     "Antalya": (32, 60, 10),
     "Mersin": (30, 70, 8),
@@ -113,7 +113,7 @@ show_chicken_content = False
 show_inventory = False
 
 player_money=0
-player_level = 5
+player_level = 0
 
 
 market_items = [
@@ -257,8 +257,8 @@ class Crop:
 
 crops = []
 #weather_status = "Yağmurlu"
-planting_allowed = True
-player_level =0
+planting_allowed = False
+
 
 def draw_sell_button():
     pygame.draw.rect(screen, (0, 200, 0), (550, 400, 100, 40))  # yeşil buton
@@ -270,17 +270,23 @@ def sell_items():
     global player_money
     eggs = inventory.get("Yumurta",0)
     milk = inventory.get("Süt", 0)
+    bugdays=inventory.get("Buğday", 0)
 
     egg_price = 5
     milk_price = 10
+    bugday_price=100
 
-    earned = eggs * egg_price + milk * milk_price
-    player_money += earned
+
+    earned = eggs * egg_price + milk * milk_price+bugday_price*bugdays
+    player_money =player_money+ earned
     print(f"Satış yapıldı! Kazanç: {earned}, Toplam Para: {player_money}")
     if inventory.get("Yumurta", 0) > 0:
         inventory["Yumurta"] = 0
     if inventory.get("Süt", 0) > 0:
         inventory["Süt"] = 0
+    if inventory.get("Buğday", 0) > 0:
+        inventory["Buğday"]=0
+
 
 
 def draw_money_and_level():
@@ -301,7 +307,7 @@ def draw_inventory():
         screen.blit(text, (120, y_offset))
         y_offset += 40
     draw_money_and_level()
-    if inventory.get("Yumurta", 0) > 0 or inventory.get("Süt", 0) > 0:
+    if inventory.get("Yumurta", 0) > 0 or inventory.get("Süt", 0) > 0 or inventory.get("Buğday",0)>0:
         draw_sell_button()
 
 
@@ -440,6 +446,7 @@ running = True
 
 while running:
 
+    planting_allowed = player_level >= 1
     screen.fill(WHITE)
     screen.blit(background, (0, 0))
     screen.blit(fruit_images[tropik_fruit], (1200, 100))
@@ -501,7 +508,9 @@ while running:
                 offset_x = chicken_area_rect.x - event.pos[0]
                 offset_y = chicken_area_rect.y - event.pos[1]
 
-            if player_level>=5:
+
+
+            if planting_allowed:
                 mouse_x, mouse_y = event.pos
                 if not (
                         cow_area_rect.collidepoint((mouse_x, mouse_y)) or
