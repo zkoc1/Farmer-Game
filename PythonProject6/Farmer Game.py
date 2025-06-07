@@ -6,8 +6,8 @@ import random
 pygame.init()
 # süt ve yumurta toplama süreleri
 # data baseden hava durumu
-#para artmalı süt ve yumurtayla market centexi değişsin ve paraya göre seviye ayarlansın
-
+#para artmalı süt ve yumurtayla market centexi değişsin ve paraya göre seviye1m ayarlansın
+#seviye sistemini önce inek ve tavuktan toplayarak satarak para kazanalım kazandığımız paraya göre ekim yapabilelim ekim yaptıkça da paramız azalsın buna göre de seviyemiz yükselsin
 city_weather_data = {
     "Antalya": (32, 60, 10),
     "Mersin": (30, 70, 8),
@@ -261,18 +261,15 @@ planting_allowed = True
 player_money = 1000
 player_level = 5
 
+
 def draw_inventory():
     pygame.draw.rect(screen, WHITE, (100, 100, 400, 400))
     pygame.draw.rect(screen, BLACK, (100, 100, 400, 400), 2)
+    y_offset = 120
 
-
-    username_text = font.render(f"Player: {username}", True, BLACK)
-    screen.blit(username_text, (120, 110))
-
-    y_offset = 150
     for item, count in inventory.items():
-        item_text = font.render(f"{item}: {count}", True, BLACK)
-        screen.blit(item_text, (120, y_offset))
+        text = font.render(f"{item}: {count}", True, BLACK)
+        screen.blit(text, (120, y_offset))
         y_offset += 40
 
 
@@ -614,6 +611,7 @@ while running:
     if  keys[pygame.K_p]:
         pygame.draw.rect(screen, WHITE, (profile_rect.x, profile_rect.y - 100, 200, 100))
         pygame.draw.rect(screen, BLACK, (profile_rect.x, profile_rect.y - 100, 200, 100), 2)
+        screen.blit(font.render(f"Player:{username}",True,BLACK),(profile_rect.x + 10, profile_rect.y - 120))
         screen.blit(font.render(f"Para: {player_money}₺", True, BLACK), (profile_rect.x + 10, profile_rect.y - 90))
         screen.blit(font.render(f"Seviye: {player_level}", True, BLACK), (profile_rect.x + 10, profile_rect.y - 60))
         screen.blit(font.render(f"Envanter için 'i'", True, BLACK), (profile_rect.x + 10, profile_rect.y - 30))
