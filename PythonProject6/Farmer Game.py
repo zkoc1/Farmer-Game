@@ -299,8 +299,8 @@ def draw_inventory():
         screen.blit(text, (120, y_offset))
         y_offset += 40
     draw_money_and_level()
-    draw_sell_button()
-
+    if inventory.get("Yumurta", 0) > 0 or inventory.get("Süt", 0) > 0:
+        draw_sell_button()
 
 
 class Chicken:
