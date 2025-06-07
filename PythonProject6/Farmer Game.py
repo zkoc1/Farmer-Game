@@ -6,7 +6,7 @@ import random
 pygame.init()
 # süt ve yumurta toplama süreleri
 # data baseden hava durumu
-#para artmalı süt ve yumurtayla market centexi değişsin ve paraya göre seviye1m ayarlansın
+# market centexi değişsin
 #seviye sistemini önce inek ve tavuktan toplayarak satarak para kazanalım kazandığımız paraya göre ekim yapabilelim ekim yaptıkça da paramız azalsın buna göre de seviyemiz yükselsin
 city_weather_data = {
     "Antalya": (32, 60, 10),
@@ -277,8 +277,10 @@ def sell_items():
     earned = eggs * egg_price + milk * milk_price
     player_money += earned
     print(f"Satış yapıldı! Kazanç: {earned}, Toplam Para: {player_money}")
-    inventory["Yumurta"] = 0
-    inventory["Süt"] = 0
+    if inventory.get("Yumurta", 0) > 0:
+        inventory["Yumurta"] = 0
+    if inventory.get("Süt", 0) > 0:
+        inventory["Süt"] = 0
 
 
 def draw_money_and_level():
