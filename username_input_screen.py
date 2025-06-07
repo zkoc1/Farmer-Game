@@ -3,7 +3,10 @@ import pygame
 import sys
 
 class UsernameInputScreen:
+    animals = pygame.image.load('animals.png')
     def __init__(self, screen):
+        self.screen = screen
+        self.animals = pygame.image.load('animals.png')
         self.screen = screen
         self.font = pygame.font.Font(None, 48)
         self.title_font = pygame.font.Font(None, 64)
@@ -17,7 +20,7 @@ class UsernameInputScreen:
             self.screen.fill((135, 210, 235))
 
             pygame.draw.rect(self.screen, (34, 139, 34), (0, 600, 2000, 200))
-
+            self.screen.blit(self.animals,(800,100))
 
             pygame.draw.circle(self.screen, (255, 255, 0), (80, 80), 50)
             title_text = self.title_font.render("Farm Game", True, (139, 69, 19))
