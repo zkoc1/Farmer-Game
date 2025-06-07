@@ -7,7 +7,7 @@ pygame.init()
 # süt ve yumurta toplama süreleri
 # data baseden hava durumu
 # market centexi değişsin
-#seviye sistemini önce inek ve tavuktan toplayarak satarak para kazanalım kazandığımız paraya göre ekim yapabilelim ekim yaptıkça da paramız azalsın buna göre de seviyemiz yükselsin
+#tropik meyve kısmı
 city_weather_data = {
     "Antalya": (32, 60, 10),
     "Mersin": (30, 70, 8),
@@ -69,7 +69,7 @@ crop_images = [
     pygame.image.load("crop_stage2.png")
 ]
 
-inventory = {}
+inventory= {}
 
 
 background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -258,7 +258,7 @@ class Crop:
 crops = []
 #weather_status = "Yağmurlu"
 planting_allowed = True
-player_level = 5
+player_level =0
 
 def draw_sell_button():
     pygame.draw.rect(screen, (0, 200, 0), (550, 400, 100, 40))  # yeşil buton
@@ -477,12 +477,12 @@ while running:
             mouse_x, mouse_y = event.pos
             if 550 <= mouse_x <= 650 and 400 <= mouse_y <= 440:
                 sell_items()
-            # Yumurtalara tıklama kontrolü
+            # Yumurtalara tıklama
             for chicken in chickens:
                 if chicken.check_egg_click(mouse_pos):
                     inventory["Yumurta"] = inventory.get("Yumurta", 0) + 1
 
-            # Sütlere tıklama kontrolü
+            # Sütlere tıklama
             for cow in cows:
                 if cow.check_milk_click(mouse_pos):
                     inventory["Süt"] = inventory.get("Süt", 0) + 1
@@ -501,7 +501,7 @@ while running:
                 offset_x = chicken_area_rect.x - event.pos[0]
                 offset_y = chicken_area_rect.y - event.pos[1]
 
-            if planting_allowed:
+            if player_level>=5:
                 mouse_x, mouse_y = event.pos
                 if not (
                         cow_area_rect.collidepoint((mouse_x, mouse_y)) or
