@@ -36,6 +36,11 @@ clock = pygame.time.Clock()
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
+from username_input_screen import UsernameInputScreen  # Eğer ayrı dosyada tutarsan
+input_screen = UsernameInputScreen(screen)
+username = input_screen.run()
+print("Welcome,", username)
+
 #son
 background = pygame.image.load("background.png")
 market = pygame.image.load('market.png')
@@ -395,6 +400,8 @@ def draw_market_content():
 back_sound = pygame.mixer.music.load('farm.wav')
 pygame.mixer.music.play(-1)
 running = True
+
+
 
 
 
