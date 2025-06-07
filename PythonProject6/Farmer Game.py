@@ -6,7 +6,7 @@ import random
 pygame.init()
 # süt ve yumurta toplama süreleri
 # data baseden hava durumu
-#para artmalı süt ve yumurtayla market centexi değişsin ve paraya göre seviye ayarlansın başlangıçta isim sorulsun oyuncuya
+#para artmalı süt ve yumurtayla market centexi değişsin ve paraya göre seviye ayarlansın
 
 city_weather_data = {
     "Antalya": (32, 60, 10),
@@ -36,12 +36,12 @@ clock = pygame.time.Clock()
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-from username_input_screen import UsernameInputScreen  # Eğer ayrı dosyada tutarsan
+from username_input_screen import UsernameInputScreen
 input_screen = UsernameInputScreen(screen)
 username = input_screen.run()
 print("Welcome,", username)
 
-#son
+
 background = pygame.image.load("background.png")
 market = pygame.image.load('market.png')
 cow_img_right = pygame.image.load('cow_right.png')
@@ -264,10 +264,15 @@ player_level = 5
 def draw_inventory():
     pygame.draw.rect(screen, WHITE, (100, 100, 400, 400))
     pygame.draw.rect(screen, BLACK, (100, 100, 400, 400), 2)
-    y_offset = 120
+
+
+    username_text = font.render(f"Player: {username}", True, BLACK)
+    screen.blit(username_text, (120, 110))
+
+    y_offset = 150
     for item, count in inventory.items():
-        text = font.render(f"{item}: {count}", True, BLACK)
-        screen.blit(text, (120, y_offset))
+        item_text = font.render(f"{item}: {count}", True, BLACK)
+        screen.blit(item_text, (120, y_offset))
         y_offset += 40
 
 
