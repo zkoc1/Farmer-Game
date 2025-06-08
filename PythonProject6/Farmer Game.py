@@ -6,7 +6,7 @@ import random
 pygame.init()
 # süt ve yumurta toplama süreleri
 # data baseden hava durumu
-# market centexi değişsin
+# market contexi değişsin
 #tropik meyve kısmı
 city_weather_data = {
     "Antalya": (32, 60, 10),
