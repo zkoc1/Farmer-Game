@@ -7,6 +7,7 @@ class UsernameInputScreen:
     def __init__(self, screen):
         self.screen = screen
         self.animals = pygame.image.load('animals.png')
+        self.sun=pygame.image.load('sun.png')
         self.screen = screen
         self.font = pygame.font.Font(None, 48)
         self.title_font = pygame.font.Font(None, 64)
@@ -21,10 +22,11 @@ class UsernameInputScreen:
 
             pygame.draw.rect(self.screen, (34, 139, 34), (0, 600, 2000, 200))
             self.screen.blit(self.animals,(800,100))
+            self.screen.blit(self.sun,(0,0))
 
-            pygame.draw.circle(self.screen, (255, 255, 0), (80, 80), 50)
+
             title_text = self.title_font.render("Farm Game", True, (139, 69, 19))
-            self.screen.blit(title_text, (230, 100))
+            self.screen.blit(title_text, (300, 150))
 
 
             label = self.font.render("Enter your username:", True, (0, 0, 0))
@@ -34,7 +36,7 @@ class UsernameInputScreen:
             pygame.draw.rect(self.screen, (160, 82, 45), self.input_box, border_radius=10)
             pygame.draw.rect(self.screen, (0, 0, 0), self.input_box, 2, border_radius=10)
 
-            # Kullanıcı adı
+
             text_surface = self.font.render(self.username, True, (255, 255, 255))
             self.screen.blit(text_surface, (self.input_box.x + 10, self.input_box.y + 15))
 
