@@ -663,7 +663,7 @@ while running:
         "city": selected_city,
         "level": player_level,
         "money": player_money,
-        "money1":player_money1,
+        "money1": player_money1,
         "milk": inventory.get("Süt", 0),
         "eggs": inventory.get("Yumurta", 0),
         "fruits": inventory.get(tropik_fruit, 0),
