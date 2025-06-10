@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 import random
 import pandas as pd
+from database_farmer import DatabaseFarmer
 
-#sql
 
 pygame.init()
 df_weather = pd.read_json('city_weather_data.json')
@@ -39,7 +39,9 @@ input_screen = UsernameInputScreen(screen)
 username = input_screen.run()
 print("Welcome,", username)
 
-
+db = DatabaseFarmer()
+player_money, player_level, inventory = db.load_player(username)
+print(f"{username} yüklendi: Para={player_money}, Seviye={player_level}, Envanter={inventory}")
 
 
 background = pygame.image.load("background.png")
@@ -620,6 +622,7 @@ fruit_tree = FruitTree(fruit_tree_rect1, tropik_fruit)
 fruit_tree.reset_timer()
 
 while running:
+    db.save_player(username, player_money, player_level, inventory)
     peas_rect = peas_img.get_rect(topleft=(peas_x, peas_y))
     dialogue_text = ""
     if(player_level<1):
@@ -769,6 +772,7 @@ while running:
 
 
                 new_rect = cow_area_rect.move(dx, dy)
+                new_rect.clamp_ip(SCREEN_RECT)
 
                 if not any(new_rect.colliderect(r) for r in
                            [market_rect, chicken_area_rect, tractor_rect, profile_rect,fruit_tree_rect1]) and \
@@ -924,5 +928,6 @@ while running:
     pygame.display.flip()
     clock.tick(60)
 
+db.close()
 pygame.quit()
 sys.exit()
