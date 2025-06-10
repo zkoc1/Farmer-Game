@@ -315,7 +315,7 @@ def sell_items():
 
     egg_price = 5
     milk_price = 10
-    bugday_price=100
+    bugday_price=50
     tropics_price=20
 
 
@@ -681,7 +681,7 @@ while running:
     cow_img = cow_img_right if cow_speed[0] > 0 else cow_img_left
     chicken_img = chicken_img_right if chicken_speed[0] > 0 else chicken_img_left
 
-    player_level = player_money // 100
+    player_level = player_money1 // 100
     screen.blit(cow_area_img, cow_area_rect.topleft)
     screen.blit(chicken_area_img, chicken_area_rect.topleft)
     screen.blit(profile_icon, profile_rect.topleft)
@@ -735,24 +735,37 @@ while running:
             if fruit_tree.check_click(event.pos):
                 pass
 
-
-            if planting_allowed and player_level > 2 :
+            if planting_allowed and player_level > 2 and player_money>=50 :
                 mouse_x, mouse_y = event.pos
-                if not (
-                        cow_area_rect.collidepoint((mouse_x, mouse_y)) or
-                        chicken_area_rect.collidepoint((mouse_x, mouse_y)) or
-                        market_rect.collidepoint((mouse_x, mouse_y))or
-                        profile_rect.collidepoint((mouse_x, mouse_y)) or
-                        tractor_rect.collidepoint((mouse_x, mouse_y)) or
-                        fruit_tree_rect1.collidepoint((mouse_x, mouse_y))
 
-                ):
+
+                new_crop_rect = pygame.Rect(mouse_x, mouse_y, 32, 32)
+
+
+                overlap = (
+                        cow_area_rect.colliderect(new_crop_rect) or
+                        chicken_area_rect.colliderect(new_crop_rect) or
+                        market_rect.colliderect(new_crop_rect) or
+                        profile_rect.colliderect(new_crop_rect) or
+                        tractor_rect.colliderect(new_crop_rect) or
+                        fruit_tree_rect1.colliderect(new_crop_rect)
+                )
+
+
+                for crop in crops:
+                    if crop.rect.colliderect(new_crop_rect):
+                        overlap = True
+                        break
+
+                if not overlap:
                     crops.append(Crop((mouse_x, mouse_y)))
-                    crops.append(Crop(event.pos))
                     player_money -= 50
+                else:
+                    print("Buraya ekin ekilemez, başka bir alan veya ekin ile çakışıyor.")
 
             else:
-               print("Seviye 3 olmadan ekim yapılamaz!")
+                print("Seviye 3 olmadan ekim yapılamaz!")
+
 
 
 
@@ -892,7 +905,7 @@ while running:
 
     screen.blit(tractor_img, tractor_rect.topleft)
     if  keys[pygame.K_p]:
-        a = player_money // 100
+        a = player_money1 // 100
         pygame.draw.rect(screen, WHITE, (profile_rect.x, profile_rect.y - 100, 200, 100))
         pygame.draw.rect(screen, BLACK, (profile_rect.x, profile_rect.y - 100, 200, 100), 2)
         screen.blit(font.render(f"Player:{username}",True,BLACK),(profile_rect.x + 10, profile_rect.y - 120))
