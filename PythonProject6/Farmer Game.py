@@ -3,10 +3,13 @@ import sys
 import torch
 import torch.nn as nn
 import random
-
+#json içine yazma
 # tavuk ve inek alanı kıstla
 #genel traktör için ekran kısıtlama market tavuk ve inek
 #ağaç ile hepsinin rect
+# meyveler dağınık ve görseli düzgün
+#npc
+#sql
 #para seviye
 #meyve satma
 #marketin konumu ve marketten satma
