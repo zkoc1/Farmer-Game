@@ -769,7 +769,7 @@ while running:
 
 
                 new_rect = cow_area_rect.move(dx, dy)
-                new_rect.clamp_ip(SCREEN_RECT)
+
                 if not any(new_rect.colliderect(r) for r in
                            [market_rect, chicken_area_rect, tractor_rect, profile_rect,fruit_tree_rect1]) and \
                         not any(new_rect.colliderect(crop.rect) for crop in crops):
