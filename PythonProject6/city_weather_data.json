@@ -1,0 +1,32 @@
+[
+  {
+    "city": "Rize",
+    "temperature": 18,
+    "humidity": 85,
+    "wind_speed": 10
+  },
+  {
+    "city": "Adana",
+    "temperature": 39,
+    "humidity": 20,
+    "wind_speed": 5
+  },
+  {
+    "city": "Antalya",
+    "temperature": 31,
+    "humidity": 45,
+    "wind_speed": 15
+  },
+  {
+    "city": "Trabzon",
+    "temperature": 18,
+    "humidity": 50,
+    "wind_speed": 8
+  },
+  {
+    "city": "Mersin",
+    "temperature": 34,
+    "humidity": 50,
+    "wind_speed": 12
+  }
+]

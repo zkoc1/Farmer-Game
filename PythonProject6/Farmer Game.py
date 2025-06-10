@@ -3,24 +3,25 @@ import sys
 import torch
 import torch.nn as nn
 import random
+import pandas as pd
 #json içine yazma
 # tavuk ve inek alanı kıstla
-#genel traktör için ekran kısıtlama market tavuk ve inek
-#ağaç ile hepsinin rect
-# meyveler dağınık ve görseli düzgün
+#genel traktör için ekran kısıtlama market tavuk ve inek +
+#ağaç ile hepsinin rect +
+# meyveler dağınık ve görseli düzgün+
 #npc
 #sql
 #para seviye
 #meyve satma
-#marketin konumu ve marketten satma
+#marketin konumu + ve marketten satma
 pygame.init()
-city_weather_data = {
-    "Rize": (18, 85, 10),
-    "Adana": (39, 20, 5),
-    "Antalya": (31, 45, 15),
-    "Trabzon": (18, 50, 8),
-    "Mersin": (34, 50, 12),
-}
+
+df_weather = pd.read_json('city_weather_data.json')
+city_weather_data = {row['city']: (row['temperature'], row['humidity'], row['wind_speed'])
+                         for index, row in df_weather.iterrows()}
+print("Hava durumu verileri JSON dosyasından başarıyla yüklendi (Pandas read_json ile).")
+
+
 city_fruit_data = {
     "Rize": "Kestane",
     "Adana": "Portakal",
@@ -30,7 +31,7 @@ city_fruit_data = {
 }
 #screen = pygame.display.set_mode((900, 700))
 font = pygame.font.SysFont(None, 40)
-cities = ["Rize", "Adana", "Antalya", "Trabzon", "Mersin"]
+cities = list(city_weather_data.keys())
 selected_animal_area = None
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 750
@@ -95,25 +96,25 @@ def apply_weather_overlay(surface, weather):
             surface.blit(cloud_image, pos)
 
     if weather == "Güneşli":
-        overlay.fill((255, 223, 0, 80))  # zemin sarı filtre
+        overlay.fill((255, 223, 0, 80))
 
     elif weather == "Yağmurlu":
-        overlay.fill((30, 30, 120, 200))       # Daha koyu mavi-gri yağmur havası
+        overlay.fill((30, 30, 120, 200))
     elif weather == "Bulutlu":
-        overlay.fill((180, 180, 180, 180))     # Daha yoğun bulut görünümü
+        overlay.fill((180, 180, 180, 180))
     elif weather == "Kurak":
-        overlay.fill((255, 140, 0, 180))       # Turuncumsu kuraklık efekti
+        overlay.fill((255, 140, 0, 180))
     surface.blit(overlay, (0, 0))
 
 
-    # GÜNEŞLİ için ışık dairesi en üste
+
     if weather == "Güneşli":
         light_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         pygame.draw.circle(light_overlay, (255, 255, 240, 180), (850, 100), 70)
         surface.blit(light_overlay, (0, 0))
 
-
-market_rect = market.get_rect(topleft=(1190, 10))
+SCREEN_RECT = screen.get_rect()
+market_rect = market.get_rect(topleft=(1190, 150))
 profile_rect = profile_icon.get_rect(topleft=(20, SCREEN_HEIGHT - 120))
 tractor_rect = tractor_img.get_rect(topleft=(500, 600))
 cow_area_rect = cow_area_img.get_rect(topleft=(3, 50))
@@ -122,7 +123,6 @@ cow_pos = [cow_area_rect.x +10, cow_area_rect.y+20 ]
 chicken_pos = [chicken_area_rect.x+10 , chicken_area_rect.y+10 ]
 cloud_image = pygame.image.load("cloudy.png").convert_alpha()
 cloud_positions = [[random.randint(0, SCREEN_WIDTH), random.randint(0, 0)] for _ in range(4)]
-
 cow_speed = [random.choice([-0.5, 0.5]), random.choice([-0.5, 0.5])]
 chicken_speed = [random.choice([-0.5, 0.5]), random.choice([-0.5, 0.5])]
 dragging_cow_area =False
@@ -167,33 +167,32 @@ def generate_data():
     X, y = [], []
 
     for _ in range(75):
-        # Yağmurlu: humidity > 75 ve temp < 22
+
         temp = random.uniform(10, 22)
         humidity = random.uniform(75, 100)
         wind = random.uniform(0, 15)
         X.append([temp, humidity, wind])
-        y.append(1)  # Yağmurlu
+        y.append(1)
 
-        # Kurak: temp > 36 ve humidity < 25
+
         temp = random.uniform(36, 45)
         humidity = random.uniform(10, 25)
         wind = random.uniform(0, 15)
         X.append([temp, humidity, wind])
-        y.append(2)  # Kurak
+        y.append(2)
 
-        # Güneşli: temp > 28 ve humidity 30-60
         temp = random.uniform(28, 35)
         humidity = random.uniform(30, 60)
         wind = random.uniform(0, 15)
         X.append([temp, humidity, wind])
-        y.append(0)  # Güneşli
+        y.append(0)
 
-        # Bulutlu: Diğer durumlar
+
         temp = random.uniform(15, 27)
         humidity = random.uniform(40, 70)
         wind = random.uniform(0, 15)
         X.append([temp, humidity, wind])
-        y.append(3)  # Bulutlu
+        y.append(3)
 
     return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.long)
 
@@ -234,7 +233,7 @@ def select_city_screen():
                     pygame.quit()
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
-                    # Klavyeden 1-5 arası tuşa basıldıysa
+
                     if pygame.K_1 <= event.key <= pygame.K_1 + len(cities) - 1:
                         index = event.key - pygame.K_1
                         selected_city = cities[index]
@@ -273,7 +272,7 @@ class Crop:
         self.rect = pygame.Rect(position[0], position[1], 32, 32)
 
 
-        # Ekinin farklı büyüme aşamalarına ait resimleri
+
         self.images = [
             pygame.image.load("crop_stage0.png"),
             pygame.image.load("crop_stage1.png"),
@@ -355,60 +354,83 @@ dust_particles = [DustParticle() for _ in range(80)]
 class FruitTree:
     def __init__(self, rect, fruit_name):
         self.rect = rect
-        self.fruit_icon = fruit_images1[fruit_name]
+        self.fruit_image = fruit_images1.get(fruit_name)
+        self.fruit_name = fruit_name
         self.fruits = []
         self.last_spawn_time = 0
-        self.spawn_interval = 5000
-        self.max_fruits_per_wave = 5
+        self.spawn_interval = 3000
+        self.fruit_lifetime = 0
+        self.num_fruits_to_spawn = 100
+        self.min_distance_between_fruits = 0.05
+
+    def get_valid_spawn_positions(self):
+        valid_positions = []
+        if self.fruit_image:
+            fruit_width = self.fruit_image.get_width()
+            fruit_height = self.fruit_image.get_height()
+            for _ in range(200):
+                x = random.randint(self.rect.left, self.rect.right - fruit_width)
+                y = random.randint(self.rect.top, self.rect.bottom - fruit_height)
+                valid_positions.append((x, y))
+        return valid_positions
 
     def spawn_fruits(self):
         self.fruits = []
+        if not self.fruit_image:
+            return
 
-        spacing = self.rect.width // 3  # bölgeyi 3 parçaya ayır
-        y_variation = self.rect.height // 3
+        fruit_width = self.fruit_image.get_width()
+        fruit_height = self.fruit_image.get_height()
+        possible_positions = self.get_valid_spawn_positions()
+        spawned_count = 0
 
-        used_positions = []
+        random.shuffle(possible_positions)
 
-        for i in range(self.max_fruits_per_wave):
-            # X konumlarını dağınık tut
-            base_x = self.rect.left + random.randint(10, self.rect.width - self.fruit_icon.get_width() - 10)
-            base_y = self.rect.top + random.randint(10, self.rect.height - self.fruit_icon.get_height() - 10)
+        for pos in possible_positions:
+            if spawned_count >= self.num_fruits_to_spawn:
+                break
 
-            # Üst üste gelmesin diye tekrar dene
-            fruit_rect = self.fruit_icon.get_rect(topleft=(base_x, base_y))
-            attempts = 0
-            while any(fruit_rect.colliderect(r) for r, v in self.fruits if v) and attempts < 50:
-                base_x = self.rect.left + random.randint(10, self.rect.width - self.fruit_icon.get_width() - 10)
-                base_y = self.rect.top + random.randint(10, self.rect.height - self.fruit_icon.get_height() - 10)
-                fruit_rect.topleft = (base_x, base_y)
-                attempts += 1
+            new_fruit_rect = self.fruit_image.get_rect(topleft=pos)
+            is_too_close = False
+            for existing_fruit_rect in self.fruits:
+                distance_x = abs(new_fruit_rect.centerx - existing_fruit_rect.centerx)
+                distance_y = abs(new_fruit_rect.centery - existing_fruit_rect.centery)
+                if distance_x < fruit_width + self.min_distance_between_fruits or \
+                   distance_y < fruit_height + self.min_distance_between_fruits:
+                    is_too_close = True
+                    break
 
-            self.fruits.append((fruit_rect, True))
+            if not is_too_close:
+                self.fruits.append(new_fruit_rect)
+                spawned_count += 1
 
     def update(self):
         now = pygame.time.get_ticks()
-        if now - self.last_spawn_time >= self.spawn_interval:
+        if not self.fruits and now - self.last_spawn_time >= self.spawn_interval:
             self.spawn_fruits()
             self.last_spawn_time = now
 
     def draw(self, surface):
-        for fruit_rect, visible in self.fruits:
-            if visible:
-                surface.blit(self.fruit_icon, fruit_rect.topleft)
+        if self.fruit_image:
+            for fruit_rect in self.fruits:
+                surface.blit(self.fruit_image, fruit_rect.topleft)
 
     def check_click(self, mouse_pos):
         global player_money
-        for i, (fruit_rect, visible) in enumerate(self.fruits):
-            if visible and fruit_rect.collidepoint(mouse_pos):
-                self.fruits[i] = (fruit_rect, False)
-                inventory[tropik_fruit] = inventory.get(tropik_fruit, 0) + 1
+        for i in range(len(self.fruits) - 1, -1, -1):
+            if self.fruits [i].collidepoint(mouse_pos):
+                inventory.setdefault(self.fruit_name, 0)
+                inventory [self.fruit_name] += 1
                 player_money += 20
-                print(f"{tropik_fruit} toplandı! Envanter: {inventory}")
+                print(f"{self.fruit_name} toplandı! Envanter: {inventory}")
+                self.fruits.pop(i)
                 return True
         return False
 
+    def reset_timer(self):
+        self.last_spawn_time = pygame.time.get_ticks()
 def draw_money_and_level():
-    player_level = player_money // 100  # her 100 para 1 seviye
+    player_level = player_money // 100
     money_text = font.render(f"Para: {player_money}", True, BLACK)
     level_text = font.render(f"Seviye: {player_level}", True, BLACK)
     screen.blit(money_text, (120, 60))
@@ -427,7 +449,8 @@ def draw_inventory():
     draw_money_and_level()
     if inventory.get("Yumurta", 0) > 0 or inventory.get("Süt", 0) > 0 or inventory.get("Buğday",0)>0:
         draw_sell_button()
-fruit_tree_rect = pygame.Rect(1180, 390, 70, 90)  # Yeşil kısmın sınırı (ağacın sağ altı)
+fruit_tree_rect = pygame.Rect(1180, 390, 70, 90)
+fruit_tree_rect1 = pygame.Rect(1155, 370, fruit_images[tropik_fruit].get_width(), fruit_images[tropik_fruit].get_height())# Yeşil kısmın sınırı (ağacın sağ altı)
 fruit_tree = FruitTree(fruit_tree_rect, tropik_fruit)
 
 class Chicken:
@@ -443,26 +466,26 @@ class Chicken:
         self.last_egg_time = pygame.time.get_ticks()
 
     def update(self, area_rect):
-        # Hareketli alan içinde offset'e göre pozisyon belirle
+
         self.offset[0] += self.speed[0]
         self.offset[1] += self.speed[1]
 
-        # Alan sınırlarına göre çarpma kontrolü
+
         if self.offset[0] < 10 or self.offset[0] > area_rect.width - self.rect.width - 10:
             self.speed[0] *= -1
         if self.offset[1] < 10 or self.offset[1] > area_rect.height - self.rect.height - 10:
             self.speed[1] *= -1
 
-        # Güncel pozisyonu hesapla
+
         self.rect.topleft = (area_rect.left + self.offset[0], area_rect.top + self.offset[1])
 
-        # Yumurtlama zamanı
+
         current_time = pygame.time.get_ticks()
-        if not self.egg_visible and current_time - self.last_egg_time >= 5000:
+        if not self.egg_visible and current_time - self.last_egg_time >= 3000:
             self.egg_visible = True
             self.egg_rect = self.egg_icon.get_rect(midbottom=(self.rect.centerx, self.rect.top))
 
-        # Yumurtanın pozisyonu güncellenmeli
+
         if self.egg_visible and self.egg_rect:
             self.egg_rect.midbottom = (self.rect.centerx, self.rect.top)
     def draw(self, screen):
@@ -559,7 +582,9 @@ back_sound = pygame.mixer.music.load('farm.wav')
 pygame.mixer.music.play(-1)
 running = True
 start_time = pygame.time.get_ticks()
-
+fruit_tree_rect1 = pygame.Rect(1210, 400, 100, 190) # Örnek rect ve meyve adı
+fruit_tree = FruitTree(fruit_tree_rect1, tropik_fruit)
+fruit_tree.reset_timer()
 
 
 
@@ -634,12 +659,12 @@ while running:
             mouse_x, mouse_y = event.pos
             if 550 <= mouse_x <= 650 and 400 <= mouse_y <= 440:
                 sell_items()
-            # Yumurtalara tıklama
+
             for chicken in chickens:
                 if chicken.check_egg_click(mouse_pos):
                     inventory["Yumurta"] = inventory.get("Yumurta", 0) + 1
 
-            # Sütlere tıklama
+
             for cow in cows:
                 if cow.check_milk_click(mouse_pos):
                     inventory["Süt"] = inventory.get("Süt", 0) + 1
@@ -662,7 +687,7 @@ while running:
             elif profile_rect.collidepoint(event.pos):
                 show_profile = not show_profile
             if fruit_tree.check_click(event.pos):
-                # meyve toplandı
+
                 pass
 
 
@@ -673,7 +698,8 @@ while running:
                         chicken_area_rect.collidepoint((mouse_x, mouse_y)) or
                         market_rect.collidepoint((mouse_x, mouse_y))or
                         profile_rect.collidepoint((mouse_x, mouse_y)) or
-                        tractor_rect.collidepoint((mouse_x, mouse_y))
+                        tractor_rect.collidepoint((mouse_x, mouse_y))or
+                        fruit_tree_rect1.collidepoint((mouse_x, mouse_y))
                 ):
                     crops.append(Crop((mouse_x, mouse_y)))
                     crops.append(Crop(event.pos))
@@ -700,9 +726,9 @@ while running:
                 #cow_pos[0] += dx
                 #cow_pos[1] += dy
                 new_rect = cow_area_rect.move(dx, dy)
-
+                new_rect.clamp_ip(SCREEN_RECT)
                 if not any(new_rect.colliderect(r) for r in
-                           [market_rect, chicken_area_rect, tractor_rect, profile_rect]) and \
+                           [market_rect, chicken_area_rect, tractor_rect, profile_rect,fruit_tree_rect1]) and \
                         not any(new_rect.colliderect(crop.rect) for crop in crops):
                     cow_area_rect = new_rect
                     cow_pos[0] += dx
@@ -720,9 +746,9 @@ while running:
                 #chicken_pos[0] += dx
                 #chicken_pos[1] += dy
                 new_rect = chicken_area_rect.move(dx, dy)
-
+                new_rect.clamp_ip(SCREEN_RECT)
                 if not any(
-                        new_rect.colliderect(r) for r in [market_rect, cow_area_rect, tractor_rect, profile_rect]) and \
+                        new_rect.colliderect(r) for r in [market_rect, cow_area_rect, tractor_rect, profile_rect,fruit_tree_rect1]) and \
                         not any(new_rect.colliderect(crop.rect) for crop in crops):
                     chicken_area_rect = new_rect
                     chicken_pos[0] += dx
@@ -735,9 +761,9 @@ while running:
                 dy = (event.pos[1] + offset_y) - market_rect.y
 
                 new_rect = market_rect.move(dx, dy)
-
+                new_rect.clamp_ip(SCREEN_RECT)
                 if not any(new_rect.colliderect(r) for r in
-                           [cow_area_rect, chicken_area_rect, tractor_rect, profile_rect]) and \
+                           [cow_area_rect, chicken_area_rect, tractor_rect, profile_rect,fruit_tree_rect1]) and \
                         not any(new_rect.colliderect(crop.rect) for crop in crops):
                     market_rect = new_rect
 
@@ -751,33 +777,39 @@ while running:
 
     new_tractor_rect = tractor_rect
 
-    # Çakışma varsa hareket etme
+
     if (not new_tractor_rect.colliderect(market_rect) and
             not new_tractor_rect.colliderect(cow_area_rect) and
             not  new_tractor_rect.colliderect(profile_rect) and
-            not new_tractor_rect.colliderect(chicken_area_rect)):
+            not new_tractor_rect.colliderect(chicken_area_rect)and
+            not new_tractor_rect.colliderect(fruit_tree_rect)
+    ):
         tractor_rect = new_tractor_rect
 
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
         new_rect = tractor_rect.move(-5, 0)
-        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect]):
+        new_rect.clamp_ip(SCREEN_RECT)
+        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect,fruit_tree_rect1,profile_rect]):
             tractor_rect = new_rect
         tractor_img = tractor_img_left
     if keys[pygame.K_RIGHT]:
         new_rect = tractor_rect.move(5, 0)
-        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect]):
+        new_rect.clamp_ip(SCREEN_RECT)
+        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect,fruit_tree_rect1,profile_rect]):
             tractor_rect = new_rect
         tractor_img = tractor_img_right
     if keys[pygame.K_UP]:
         new_rect = tractor_rect.move( 0,-5)
-        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect]):
+        new_rect.clamp_ip(SCREEN_RECT)
+        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect,fruit_tree_rect1,profile_rect]):
             tractor_rect = new_rect
         tractor_img =  tractor_img_right
     if keys[pygame.K_DOWN]:
         new_rect = tractor_rect.move(0,5)
-        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect]):
+        new_rect.clamp_ip(SCREEN_RECT)
+        if not any(new_rect.colliderect(r) for r in [market_rect, cow_area_rect, chicken_area_rect,fruit_tree_rect1,profile_rect]):
             tractor_rect = new_rect
         tractor_img = tractor_img_left
 
