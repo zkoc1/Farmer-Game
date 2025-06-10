@@ -4,7 +4,8 @@ import torch
 import torch.nn as nn
 import random
 import pandas as pd
-
+from database_farmer import DatabaseFarmer
+import json
 
 
 pygame.init()
@@ -34,13 +35,14 @@ clock = pygame.time.Clock()
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
+
+
 from username_input_screen import UsernameInputScreen
 input_screen = UsernameInputScreen(screen)
 username = input_screen.run()
 print("Welcome,", username)
 
-
-
+db = DatabaseFarmer()
 
 background = pygame.image.load("background.png")
 market = pygame.image.load('market.png')
@@ -213,7 +215,7 @@ def select_city_screen():
         selected_city = None
         while True:
             screen.fill((200, 220, 255))
-            title = font1.render("Bir şehir seçin (1-5):", True, (0, 0, 0))
+            title = font1.render("Select a city (1-5):", True, (0, 0, 0))
             screen.blit(title, (250, 50))
 
             for i, city in enumerate(cities):
@@ -227,13 +229,20 @@ def select_city_screen():
                     pygame.quit()
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
-                    # Klavyeden 1-5 arası tuşa basıldıysa
                     if pygame.K_1 <= event.key <= pygame.K_1 + len(cities) - 1:
                         index = event.key - pygame.K_1
                         selected_city = cities[index]
                         return selected_city
 
-selected_city = select_city_screen()
+player_data = db.load_player(username)
+
+if player_data:
+    # Kullanıcı daha önce kayıt olmuş
+    selected_city = player_data["city"]
+    print(f"Kayıt bulundu. Şehir: {selected_city} → şehir seçim ekranı atlandı.")
+else:
+    selected_city = select_city_screen()  # kendi şehir seçim fonksiyonun
+
 print("Seçilen şehir:", selected_city)
 temp, humidity, wind = city_weather_data[selected_city]
 weather_status = predict_weather(temp, humidity, wind)
@@ -422,7 +431,6 @@ class FruitTree:
             if self.fruits [i].collidepoint(mouse_pos):
                 inventory.setdefault(self.fruit_name, 0)
                 inventory [self.fruit_name] += 1
-                player_money += 20
                 print(f"{self.fruit_name} toplandı! Envanter: {inventory}")
                 self.fruits.pop(i)
                 return True
@@ -432,8 +440,8 @@ class FruitTree:
         self.last_spawn_time = pygame.time.get_ticks()
 def draw_money_and_level():
         player_level = player_money1 // 100
-        money_text = font.render(f"Para: {player_money}", True, BLACK)
-        level_text = font.render(f"Seviye: {player_level}", True, BLACK)
+        money_text = font.render(f"Money: {player_money}", True, BLACK)
+        level_text = font.render(f"Level: {player_level}", True, BLACK)
         screen.blit(money_text, (120, 60))
         screen.blit(level_text, (120, 80))
 
@@ -469,8 +477,6 @@ class Chicken:
     def update(self, area_rect):
         self.offset[0] += self.speed[0]
         self.offset[1] += self.speed[1]
-
-
         if self.offset[0] < 10 or self.offset[0] > area_rect.width - self.rect.width - 10:
             self.speed[0] *= -1
         if self.offset[1] < 10 or self.offset[1] > area_rect.height - self.rect.height - 10:
@@ -585,15 +591,11 @@ def draw_speech_bubble(surface, text, character_rect, offset_x=0, offset_y=0, pa
     bubble_rect = pygame.Rect(bubble_x, bubble_y, bubble_width, bubble_height)
     pygame.draw.rect(surface, LIGHT_GREY, bubble_rect, border_radius=8)
     pygame.draw.rect(surface, BLACK, bubble_rect, 2, border_radius=8)
-
-
     tail_point1 = (character_rect.centerx + offset_x, character_rect.top + offset_y)
     tail_point2 = (bubble_rect.centerx - 10, bubble_rect.bottom)
     tail_point3 = (bubble_rect.centerx + 10, bubble_rect.bottom)
     pygame.draw.polygon(surface, LIGHT_GREY, [tail_point1, tail_point2, tail_point3])
     pygame.draw.polygon(surface, BLACK, [tail_point1, tail_point2, tail_point3], 2)
-
-
     text_x = bubble_x + padding
     text_y = bubble_y + padding
     surface.blit(rendered_text, (text_x, text_y))
@@ -619,20 +621,76 @@ fruit_tree_rect1 = pygame.Rect(1210, 400, 100, 190)
 fruit_tree = FruitTree(fruit_tree_rect1, tropik_fruit)
 fruit_tree.reset_timer()
 
+
+
+player_data = db.load_player(username)
+
+if player_data:
+    player_money = player_data["money"]
+    player_money1=player_data["money1"]
+    player_level = player_data["level"]
+    inventory = player_data["inventory_data"]
+    selected_city = player_data["city"]
+
+    market_rect.topleft = player_data["market_pos"]
+    chicken_area_rect.topleft = player_data["chicken_pos"]
+    cow_area_rect.topleft = player_data["cow_pos"]
+
+
+    crops = [Crop(tuple(pos)) for pos in player_data["wheat_positions"]]
+else:
+    player_money = 0
+    player_level = 0
+    inventory = {}
+    selected_city = selected_city
+    crops = []
+
+player_data = db.load_player(username)
+if player_data:
+        money1 = player_data["money1"]
+        print("Money1 from DB:", money1)
+else:
+       money1=player_money1
+
 while running:
+
+    player_level=money1//100
+
+    crop_positions = [crop.rect.topleft for crop in crops]
+
+    db.save_player({
+        "username": username,
+        "city": selected_city,
+        "level": player_level,
+        "money": player_money,
+        "money1":player_money1,
+        "milk": inventory.get("Süt", 0),
+        "eggs": inventory.get("Yumurta", 0),
+        "fruits": inventory.get(tropik_fruit, 0),
+        "market_x": market_rect.left,
+        "market_y": market_rect.top,
+        "chicken_x": chicken_area_rect.left,
+        "chicken_y": chicken_area_rect.top,
+        "cow_x": cow_area_rect.left,
+        "cow_y": cow_area_rect.top,
+        "wheat_positions": crop_positions,
+        "inventory_data": inventory
+    })
+
     peas_rect = peas_img.get_rect(topleft=(peas_x, peas_y))
     dialogue_text = ""
     if(player_level<1):
-        dialogue_text = f"Merhaba {username}! yumurta ve sütleri toplayıp satarak para kazanabilirsin"
+        dialogue_text = f"HELLO {username}! You can earn money by collecting and selling eggs and milk"
     elif player_level==3:
-        dialogue_text = "3 level oldun ekim yapabilirsin"
+        dialogue_text = "You are level 3 and can plant."
     elif inventory.get("Yumurta", 0) > 0 or inventory.get("Süt", 0) > 0 or inventory.get("Buğday", 0) > 0 or inventory.get(tropik_fruit,0)>0:
-        dialogue_text="Ürünlerini satmanda yardımcı olabilirim istersen? \n1-Evet"
+        dialogue_text="I can help you sell your products if you want? \n1-Yes"
     else:
-        dialogue_text=f"Harika gidiyorsun şimdiden {player_level}. levele ulaştın"
+        dialogue_text=f"You are doing great! You have already reached level {player_level}"
     dialogue_timer = 0
     DIALOGUE_DURATION = 30000
-    screen.blit(fruit_images[tropik_fruit], (1155, 370))
+    if tropik_fruit in fruit_images:
+        screen.blit(fruit_images[tropik_fruit], (1155, 370))
     peas_x+=peas_speed
     if peas_x>SCREEN_WIDTH:
         peas_x=-peas_img.get_width()
@@ -680,8 +738,6 @@ while running:
 
     cow_img = cow_img_right if cow_speed[0] > 0 else cow_img_left
     chicken_img = chicken_img_right if chicken_speed[0] > 0 else chicken_img_left
-
-    player_level = player_money1 // 100
     screen.blit(cow_area_img, cow_area_rect.topleft)
     screen.blit(chicken_area_img, chicken_area_rect.topleft)
     screen.blit(profile_icon, profile_rect.topleft)
@@ -735,12 +791,10 @@ while running:
             if fruit_tree.check_click(event.pos):
                 pass
 
-            if planting_allowed and player_level > 2 and player_money>=50 :
+            if planting_allowed and player_level > 2 and player_money >= 50:
                 mouse_x, mouse_y = event.pos
 
-
                 new_crop_rect = pygame.Rect(mouse_x, mouse_y, 32, 32)
-
 
                 overlap = (
                         cow_area_rect.colliderect(new_crop_rect) or
@@ -750,7 +804,6 @@ while running:
                         tractor_rect.colliderect(new_crop_rect) or
                         fruit_tree_rect1.colliderect(new_crop_rect)
                 )
-
 
                 for crop in crops:
                     if crop.rect.colliderect(new_crop_rect):
@@ -768,7 +821,6 @@ while running:
 
 
 
-
         elif event.type == pygame.MOUSEBUTTONUP:
             dragging_market = False
             dragging_cow_area = False
@@ -782,6 +834,7 @@ while running:
 
 
                 new_rect = cow_area_rect.move(dx, dy)
+                new_rect.clamp_ip(SCREEN_RECT)
 
                 if not any(new_rect.colliderect(r) for r in
                            [market_rect, chicken_area_rect, tractor_rect, profile_rect,fruit_tree_rect1]) and \
@@ -909,9 +962,9 @@ while running:
         pygame.draw.rect(screen, WHITE, (profile_rect.x, profile_rect.y - 100, 200, 100))
         pygame.draw.rect(screen, BLACK, (profile_rect.x, profile_rect.y - 100, 200, 100), 2)
         screen.blit(font.render(f"Player:{username}",True,BLACK),(profile_rect.x + 10, profile_rect.y - 120))
-        screen.blit(font.render(f"Para: {player_money}₺", True, BLACK), (profile_rect.x + 10, profile_rect.y - 90))
-        screen.blit(font.render(f"Seviye: {a}", True, BLACK), (profile_rect.x + 10, profile_rect.y - 60))
-        screen.blit(font.render(f"Envanter için 'i'", True, BLACK), (profile_rect.x + 10, profile_rect.y - 30))
+        screen.blit(font.render(f"Money: {player_money}₺", True, BLACK), (profile_rect.x + 10, profile_rect.y - 90))
+        screen.blit(font.render(f"Level: {a}", True, BLACK), (profile_rect.x + 10, profile_rect.y - 60))
+        screen.blit(font.render(f"For inventory 'i'", True, BLACK), (profile_rect.x + 10, profile_rect.y - 30))
         screen.blit(cow_area_img, cow_area_rect)
         screen.blit(chicken_area_img, chicken_area_rect)
 
@@ -932,10 +985,13 @@ while running:
     if show_inventory:
         draw_inventory()
 
+    crop_positions = [crop.rect.topleft for crop in crops]
+
 
 
     pygame.display.flip()
     clock.tick(60)
 
+db.close()
 pygame.quit()
 sys.exit()
