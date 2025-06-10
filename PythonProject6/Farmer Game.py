@@ -4,8 +4,12 @@ import torch
 import torch.nn as nn
 import random
 
-# market contexi değişsin
-#tropik meyve kısmı
+# tavuk ve inek alanı kıstla
+#genel traktör için ekran kısıtlama market tavuk ve inek
+#ağaç ile hepsinin rect
+#para seviye
+#meyve satma
+#marketin konumu ve marketten satma
 pygame.init()
 city_weather_data = {
     "Rize": (18, 85, 10),
